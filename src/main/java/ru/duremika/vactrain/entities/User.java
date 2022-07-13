@@ -37,13 +37,19 @@ public class User implements UserDetails {
     }
 
 
-
     @Override
     public String toString() {
-        return String.format("User{id=%d, firstname='%s', lastname='%s'}",
-                this.id,
-                this.firstname,
-                this.lastname
+        return String.format(
+                "User{id=%d, username='%s, password='%s', firstname='%s', lastname='%s', email='%s', createdAt='%s', enabled='%s', authorities='%s'}'",
+                id,
+                username,
+                password,
+                firstname,
+                lastname,
+                email,
+                createdAt,
+                enabled,
+                authorities
         );
     }
 
