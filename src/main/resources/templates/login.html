@@ -20,6 +20,13 @@
         <form method="post" th:action="@{/login}">
             <h1 class="display-4 py-4">Sign In</h1>
 
+            <div class="alert alert-danger text-center" th:if="${param.error}">
+                Invalid username and password.
+            </div>
+            <div class="alert alert-warning text-center" th:if="${param.logout}">
+                You have been logged out.
+            </div>
+
             <div class="input-group">
                 <div class="input-group-prepend">
                     <span class="input-group-text">
