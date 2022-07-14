@@ -42,20 +42,19 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .antMatchers("/")
-                .permitAll()
-                .anyRequest()
-                .authenticated()
-                .and()
+                    .antMatchers("/", "/login", "/register")
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated()
+                    .and()
                 .formLogin()
+                    .loginPage("/login")
+                    .permitAll()
                 .defaultSuccessUrl("/authenticated")
-                .permitAll()
-                .and()
+                    .permitAll()
+                    .and()
                 .logout()
-                .permitAll()
-                .and()
-                .csrf()
-                .disable();
+                    .permitAll();
         return http.build();
     }
 

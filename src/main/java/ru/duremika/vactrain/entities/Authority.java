@@ -30,4 +30,9 @@ public class Authority {
     public void setAuthority(String authority) {
         this.authority = authority;
     }
+
+    @Override
+    public String toString() {
+        return String.format("Authority{id=%d, authority='%s'}", id, authority);
+    }
 }

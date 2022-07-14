@@ -1,8 +1,6 @@
 package ru.duremika.vactrain.controllers;
 
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import ru.duremika.vactrain.entities.User;
 import ru.duremika.vactrain.repositories.UserRepository;
@@ -20,19 +18,5 @@ public class UserController {
     @GetMapping("/users")
     public List<User> users() {
         return repository.findAll();
-    }
-
-    @GetMapping("/authenticated")
-    public String authenticated(Model model) {
-        model.addAttribute("usr", getPrincipal());
-        return "authenticated";
-    }
-
-    private User getPrincipal() {
-        User user = null;
-        if (SecurityContextHolder.getContext().getAuthentication().getPrincipal() instanceof User) {
-            user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        }
-        return user;
     }
 }

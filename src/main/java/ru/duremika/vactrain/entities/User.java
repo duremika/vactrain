@@ -40,7 +40,7 @@ public class User implements UserDetails {
     @Override
     public String toString() {
         return String.format(
-                "User{id=%d, username='%s, password='%s', firstname='%s', lastname='%s', email='%s', createdAt='%s', enabled='%s', authorities='%s'}'",
+                "User{id=%d, username='%s', password='%s', firstname='%s', lastname='%s', email='%s', createdAt='%s', enabled='%s', authorities='%s'}'",
                 id,
                 username,
                 password,
