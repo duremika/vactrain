@@ -19,7 +19,7 @@
     <div class="col col-md-6 text-center">
         <form method="post" th:action="@{/login}">
             <h1 class="display-4 py-4">Sign In</h1>
-
+            <div class="alert alert-info text-center" th:if="${param.message}" th:text="${param.message}"></div>
             <div class="alert alert-danger text-center" th:if="${param.error}">
                 Invalid username and password.
             </div>
