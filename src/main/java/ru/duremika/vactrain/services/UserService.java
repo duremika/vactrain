@@ -8,24 +8,27 @@ import ru.duremika.vactrain.entities.User;
 import ru.duremika.vactrain.repositories.UserRepository;
 
 import javax.transaction.Transactional;
-import java.sql.Timestamp;
-import java.util.Date;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserService {
     private final UserRepository repository;
     private final ModelMapper modelMapper;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final VerificationTokenService verificationTokenService;
+    private final EmailService emailService;
 
     public UserService(
             UserRepository repository,
             ModelMapper modelMapper,
-            BCryptPasswordEncoder passwordEncoder
-    ) {
+            BCryptPasswordEncoder passwordEncoder,
+            VerificationTokenService verificationTokenService, EmailService emailService) {
         this.repository = repository;
         this.modelMapper = modelMapper;
         this.passwordEncoder = passwordEncoder;
+        this.verificationTokenService = verificationTokenService;
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -49,8 +52,12 @@ public class UserService {
         User user = modelMapper.map(userDTO, User.class);
 
         user.setPassword(encodedPassword);
-        user.setEnabled(true);
-        user.setCreatedAt(new Timestamp(new Date().getTime()));
-        save(user);
+        user.setEnabled(false);
+        Optional<User> savedUser = Optional.of(save(user));
+        savedUser.ifPresent( u -> {
+            String token = UUID.randomUUID().toString();
+            verificationTokenService.save(savedUser.get(), token);
+            emailService.sendConfirmLink(u);
+        });
     }
 }
