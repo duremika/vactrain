@@ -2,6 +2,7 @@ package ru.duremika.vactrain.services;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -60,6 +61,10 @@ public class EmailService {
                         If you did not register for a Vactrain Account, someone may have registered with your information by mistake. Contact Vactrain support for further assistance."""
                         .formatted(confirmLink)
         );
-        javaMailSender.send(msg);
+        try {
+            javaMailSender.send(msg);
+        } catch (MailException e){
+            logger.error("Message: {} dont has ben send", msg);
+        }
     }
 }
