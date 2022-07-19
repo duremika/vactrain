@@ -9,8 +9,6 @@ import ru.duremika.vactrain.entities.User;
 import ru.duremika.vactrain.entities.VerificationToken;
 
 import javax.servlet.http.HttpServletRequest;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 @Service
 public class EmailService {

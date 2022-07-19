@@ -9,7 +9,6 @@ import ru.duremika.vactrain.entities.User;
 import ru.duremika.vactrain.repositories.UserRepository;
 
 import javax.transaction.Transactional;
-import java.net.UnknownHostException;
 import java.util.Optional;
 import java.util.UUID;
 
