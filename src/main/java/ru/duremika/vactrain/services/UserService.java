@@ -1,6 +1,7 @@
 package ru.duremika.vactrain.services;
 
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.duremika.vactrain.DTO.UserDTO;
@@ -19,17 +20,19 @@ public class UserService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final VerificationTokenService verificationTokenService;
     private final EmailService emailService;
+    private final Logger logger;
 
     public UserService(
             UserRepository repository,
             ModelMapper modelMapper,
             BCryptPasswordEncoder passwordEncoder,
-            VerificationTokenService verificationTokenService, EmailService emailService) {
+            VerificationTokenService verificationTokenService, EmailService emailService, Logger logger) {
         this.repository = repository;
         this.modelMapper = modelMapper;
         this.passwordEncoder = passwordEncoder;
         this.verificationTokenService = verificationTokenService;
         this.emailService = emailService;
+        this.logger = logger;
     }
 
     @Transactional
@@ -38,12 +41,17 @@ public class UserService {
     }
 
     public boolean isExists(String username) {
-        return findUser(username).isPresent();
+        Optional<User> user = findUser(username);
+        logger.info("In user repository by username {} exists {}", username, user);
+        return user.isPresent();
     }
 
     @Transactional
     public User save(User user) {
-        return repository.save(user);
+        User savedUser = repository.save(user);
+        logger.info("User repository saved {}", user);
+        logger.info("User repository after save return result {}", savedUser);
+        return savedUser;
     }
 
     public void registry(UserDTO userDTO) {
@@ -54,15 +62,15 @@ public class UserService {
 
         user.setPassword(encodedPassword);
         user.setEnabled(false);
-        Optional<User> savedUser = Optional.of(save(user));
-        savedUser.ifPresent( u -> {
+
+        User savedUser = save(user);
+
+        if (savedUser != null){
             String token = UUID.randomUUID().toString();
-            verificationTokenService.save(savedUser.get(), token);
-            try {
-                emailService.sendConfirmLink(u);
-            } catch (UnknownHostException e) {
-                throw new RuntimeException(e);
-            }
-        });
+            verificationTokenService.save(savedUser, token);
+            emailService.sendConfirmLink(savedUser);
+        } else {
+            logger.info("New user not registry. DB returned null");
+        }
     }
 }

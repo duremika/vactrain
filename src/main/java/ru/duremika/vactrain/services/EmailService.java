@@ -1,5 +1,6 @@
 package ru.duremika.vactrain.services;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -10,13 +11,13 @@ import ru.duremika.vactrain.entities.VerificationToken;
 import javax.servlet.http.HttpServletRequest;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.UnknownHostException;
 
 @Service
 public class EmailService {
     private final VerificationTokenService verificationTokenService;
     private final JavaMailSender javaMailSender;
     private final HttpServletRequest request;
+    private final Logger logger;
     @Value("${spring.mail.username}")
     String from;
 
@@ -24,27 +25,26 @@ public class EmailService {
     public EmailService(
             VerificationTokenService verificationTokenService,
             JavaMailSender javaMailSender,
-            HttpServletRequest request
-    ) {
+            HttpServletRequest request,
+            Logger logger) {
         this.verificationTokenService = verificationTokenService;
         this.javaMailSender = javaMailSender;
         this.request = request;
+        this.logger = logger;
     }
 
-    public void sendConfirmLink(User user) throws UnknownHostException {
+    public void sendConfirmLink(User user){
         VerificationToken verificationToken = verificationTokenService.findByUser(user);
-        if (verificationToken == null) return;
-
-        String hostaddress;
-        try {
-            URL url = new URL(request.getRequestURL().toString());
-            hostaddress = "%s://%s".formatted(
-                    url.getProtocol(), url.getHost());
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
+        if (verificationToken == null){
+            logger.info("Send link failed. DB returned null");
+            return;
         }
 
         String token = verificationToken.getToken();
+        String requestUrl = request.getRequestURL().toString();
+        String hostUrl = requestUrl.replaceFirst("/register", "");
+        String confirmLink = "%s/activation?token=%s".formatted(hostUrl, token);
+        logger.info("Confirm link: {}", confirmLink);
 
         SimpleMailMessage msg = new SimpleMailMessage();
         msg.setFrom(from);
@@ -57,11 +57,10 @@ public class EmailService {
 
                         We are almost done creating your Vactrain account. To use the full potential of your account we kindly ask you to click on the link below to verify your account:
 
-                        %s/activation?token=%s
-
+                        %s
 
                         If you did not register for a Vactrain Account, someone may have registered with your information by mistake. Contact Vactrain support for further assistance."""
-                        .formatted(hostaddress, token)
+                        .formatted(confirmLink)
         );
         javaMailSender.send(msg);
     }

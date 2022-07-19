@@ -1,5 +1,6 @@
 package ru.duremika.vactrain.controllers;
 
+import org.slf4j.Logger;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,14 +18,17 @@ import ru.duremika.vactrain.services.VerificationTokenService;
 import javax.validation.Valid;
 import java.sql.Timestamp;
 
+
 @Controller
 public class AccountController {
     private final UserService userService;
     private final VerificationTokenService verificationTokenService;
+    private final Logger logger;
 
-    public AccountController(UserService userService, VerificationTokenService verificationTokenService) {
+    public AccountController(UserService userService, VerificationTokenService verificationTokenService, Logger logger) {
         this.userService = userService;
         this.verificationTokenService = verificationTokenService;
+        this.logger = logger;
     }
 
 
@@ -37,6 +41,7 @@ public class AccountController {
     @GetMapping("/register")
     public String register(@ModelAttribute UserDTO userDTO, Model model) {
         model.addAttribute("userDTO", userDTO);
+        logger.info("Get request '/register' userDTO: {}", userDTO);
         return "register";
     }
 
@@ -46,9 +51,12 @@ public class AccountController {
             BindingResult bindingResult,
             RedirectAttributes attributes
     ) {
+
+        logger.info("Post request '/register' userDTO: {}", userDTO);
         if (userService.isExists(userDTO.getUsername())) {
             FieldError error = new FieldError("userDTO", "username", "User name already exists");
             bindingResult.addError(error);
+            logger.info("Post request '/register' User name {} already exists", userDTO.getUsername());
         }
 
         if (userDTO.getPassword() != null && userDTO.getRpassword() != null) {
@@ -61,6 +69,7 @@ public class AccountController {
         if (bindingResult.hasErrors()) {
             return "/register";
         }
+        logger.info("Post request '/register' without errors");
         userService.registry(userDTO);
         attributes.addAttribute("message",
                 "A verification email has been sent to " + userDTO.getEmail());
@@ -69,30 +78,33 @@ public class AccountController {
 
     @GetMapping("/activation")
     public String activation(@RequestParam("token") String token, Model model) {
+        logger.info("Get request '/activation' token: {}", token);
         VerificationToken verificationToken = verificationTokenService.findByToken(token);
         if (verificationToken == null) {
             model.addAttribute("message", "Verification token is invalid");
-
+            logger.info("Get request '/activation' token is invalid");
         } else {
             User user = verificationToken.getUser();
-
+            logger.info("Get request '/activation' user: {}", user);
             if (!user.isEnabled()) {
                 Timestamp now = new Timestamp(System.currentTimeMillis());
                 if (verificationToken.getExpiryDate().before(now)) {
                     model.addAttribute("message", "Verification token has expired");
+                    logger.info("Get request '/activation' token has expired");
                 } else {
                     user.setEnabled(true);
                     user.setCreatedAt(now);
                     userService.save(user);
+                    logger.info("Get request '/activation' user saved");
                     verificationTokenService.remove(token);
+                    logger.info("Get request '/activation' token removed");
                     model.addAttribute("message", "Account is successfully activated");
-
                 }
             } else {
                 model.addAttribute("message", "Account is already activated");
+
+                logger.info("Get request '/activation' user already activated");
             }
-
-
         }
         return "/activation";
     }
