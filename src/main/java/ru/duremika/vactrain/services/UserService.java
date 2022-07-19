@@ -8,6 +8,7 @@ import ru.duremika.vactrain.entities.User;
 import ru.duremika.vactrain.repositories.UserRepository;
 
 import javax.transaction.Transactional;
+import java.net.UnknownHostException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -57,7 +58,11 @@ public class UserService {
         savedUser.ifPresent( u -> {
             String token = UUID.randomUUID().toString();
             verificationTokenService.save(savedUser.get(), token);
-            emailService.sendConfirmLink(u);
+            try {
+                emailService.sendConfirmLink(u);
+            } catch (UnknownHostException e) {
+                throw new RuntimeException(e);
+            }
         });
     }
 }
