@@ -1,9 +1,12 @@
 package ru.duremika.vactrain.services;
 
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.duremika.vactrain.DTO.UserDTO;
+import ru.duremika.vactrain.VactrainApplication;
 import ru.duremika.vactrain.entities.User;
 import ru.duremika.vactrain.repositories.UserRepository;
 
@@ -19,6 +22,9 @@ public class UserService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final VerificationTokenService verificationTokenService;
     private final EmailService emailService;
+
+    static final Logger log =
+            LoggerFactory.getLogger(VactrainApplication.class);
 
     public UserService(
             UserRepository repository,
@@ -61,6 +67,7 @@ public class UserService {
             try {
                 emailService.sendConfirmLink(u);
             } catch (UnknownHostException e) {
+                log.error("Link has not sended user: " + u);
                 throw new RuntimeException(e);
             }
         });
