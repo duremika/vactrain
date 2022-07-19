@@ -38,8 +38,8 @@ public class EmailService {
         String hostaddress;
         try {
             URL url = new URL(request.getRequestURL().toString());
-            hostaddress = "%s://%s:%s".formatted(
-                    url.getProtocol(), url.getHost(), url.getPort());
+            hostaddress = "%s://%s".formatted(
+                    url.getProtocol(), url.getHost());
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
