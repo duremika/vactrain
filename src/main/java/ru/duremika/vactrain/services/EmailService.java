@@ -8,6 +8,8 @@ import ru.duremika.vactrain.entities.User;
 import ru.duremika.vactrain.entities.VerificationToken;
 
 import javax.servlet.http.HttpServletRequest;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.UnknownHostException;
 
 @Service
@@ -23,7 +25,7 @@ public class EmailService {
             VerificationTokenService verificationTokenService,
             JavaMailSender javaMailSender,
             HttpServletRequest request
-            ) {
+    ) {
         this.verificationTokenService = verificationTokenService;
         this.javaMailSender = javaMailSender;
         this.request = request;
@@ -33,9 +35,15 @@ public class EmailService {
         VerificationToken verificationToken = verificationTokenService.findByUser(user);
         if (verificationToken == null) return;
 
-        String hostaddress = request.getLocalName();
-        System.out.println(hostaddress);
-        System.out.println(request.getLocalAddr());
+        String hostaddress;
+        try {
+            URL url = new URL(request.getRequestURL().toString());
+            hostaddress = "%s://%s:%s".formatted(
+                    url.getProtocol(), url.getHost(), url.getPort());
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+
         String token = verificationToken.getToken();
 
         SimpleMailMessage msg = new SimpleMailMessage();
@@ -49,7 +57,7 @@ public class EmailService {
 
                         We are almost done creating your Vactrain account. To use the full potential of your account we kindly ask you to click on the link below to verify your account:
 
-                        %sactivation?token=%s
+                        %s/activation?token=%s
 
 
                         If you did not register for a Vactrain Account, someone may have registered with your information by mistake. Contact Vactrain support for further assistance."""
