@@ -67,7 +67,7 @@ public class AccountController {
         }
 
         if (bindingResult.hasErrors()) {
-            return "/register";
+            return "register";
         }
         logger.info("Post request '/register' without errors");
         userService.registry(userDTO);
@@ -106,7 +106,7 @@ public class AccountController {
                 logger.info("Get request '/activation' user already activated");
             }
         }
-        return "/activation";
+        return "activation";
     }
 
 }
