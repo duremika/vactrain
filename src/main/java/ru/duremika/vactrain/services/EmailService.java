@@ -7,27 +7,35 @@ import org.springframework.stereotype.Service;
 import ru.duremika.vactrain.entities.User;
 import ru.duremika.vactrain.entities.VerificationToken;
 
-import java.net.InetAddress;
+import javax.servlet.http.HttpServletRequest;
 import java.net.UnknownHostException;
 
 @Service
 public class EmailService {
     private final VerificationTokenService verificationTokenService;
     private final JavaMailSender javaMailSender;
+    private final HttpServletRequest request;
     @Value("${spring.mail.username}")
     String from;
 
 
-    public EmailService(VerificationTokenService verificationTokenService, JavaMailSender javaMailSender) {
+    public EmailService(
+            VerificationTokenService verificationTokenService,
+            JavaMailSender javaMailSender,
+            HttpServletRequest request
+            ) {
         this.verificationTokenService = verificationTokenService;
         this.javaMailSender = javaMailSender;
+        this.request = request;
     }
 
     public void sendConfirmLink(User user) throws UnknownHostException {
         VerificationToken verificationToken = verificationTokenService.findByUser(user);
         if (verificationToken == null) return;
 
-        String hostaddress =  InetAddress.getLocalHost().getHostAddress();
+        String hostaddress = request.getLocalName();
+        System.out.println(hostaddress);
+        System.out.println(request.getLocalAddr());
         String token = verificationToken.getToken();
 
         SimpleMailMessage msg = new SimpleMailMessage();
