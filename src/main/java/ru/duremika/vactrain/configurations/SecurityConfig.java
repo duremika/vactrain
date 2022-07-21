@@ -6,18 +6,25 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import ru.duremika.vactrain.entities.User;
 import ru.duremika.vactrain.services.UserService;
 
+import javax.sql.DataSource;
 import java.util.Optional;
 
 
 @Configuration
 public class SecurityConfig {
     private final UserService userService;
+    private final DataSource dataSource;
 
-    public SecurityConfig(UserService userService) {
+    public SecurityConfig(
+            UserService userService,
+            DataSource dataSource) {
         this.userService = userService;
+        this.dataSource = dataSource;
     }
 
 
@@ -32,6 +39,12 @@ public class SecurityConfig {
         };
     }
 
+    @Bean
+    public PersistentTokenRepository persistentTokenRepository(){
+        JdbcTokenRepositoryImpl tokenRepository = new JdbcTokenRepositoryImpl();
+        tokenRepository.setDataSource(dataSource);
+        return tokenRepository;
+    }
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -48,7 +61,11 @@ public class SecurityConfig {
                     .permitAll()
                     .and()
                 .logout()
-                    .permitAll();
+                    .permitAll()
+                    .and()
+                .rememberMe()
+                    .tokenRepository(persistentTokenRepository())
+                .and();
         return http.build();
     }
 
