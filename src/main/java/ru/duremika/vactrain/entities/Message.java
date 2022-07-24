@@ -1,16 +1,27 @@
 package ru.duremika.vactrain.entities;
 
+import javax.persistence.*;
+import java.sql.Timestamp;
+import java.util.Objects;
+
+@Entity
 public class Message {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
     private String sender;
     private String receiver;
     private String messageText;
-    private String date;
+    private Timestamp date;
     private Status status;
+
+
 
     public Message() {
     }
 
-    public Message(String sender, String receiver, String messageText, String date, Status status) {
+    public Message(String sender, String receiver, String messageText, Timestamp date, Status status) {
         this.sender = sender;
         this.receiver = receiver;
         this.messageText = messageText;
@@ -18,6 +29,13 @@ public class Message {
         this.status = status;
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
     public String getSender() {
         return sender;
     }
@@ -42,11 +60,11 @@ public class Message {
         this.messageText = messageText;
     }
 
-    public String getDate() {
+    public Timestamp getDate() {
         return date;
     }
 
-    public void setDate(String date) {
+    public void setDate(Timestamp date) {
         this.date = date;
     }
 
@@ -56,6 +74,20 @@ public class Message {
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Message message = (Message) o;
+        return Objects.equals(id, message.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
     @Override

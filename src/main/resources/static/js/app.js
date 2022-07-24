@@ -1,16 +1,17 @@
 const socket = new SockJS('/ws');
 const stompClient = Stomp.over(socket);
-let sender;
+let thisUser;
 
 stompClient.connect({}, onConnected);
 
-function onConnected(frame) {
-    sender = frame.headers['user-name'];
+async function onConnected(frame) {
+    thisUser = frame.headers['user-name'];
     stompClient.subscribe('/chatroom/general', onPublicMessageReceived);
-    stompClient.subscribe('/user/' + sender + '/private', onPrivateMessageReceived);
+    stompClient.subscribe('/user/' + thisUser + '/private', onPrivateMessageReceived);
+    await receiveOldMessages();
     stompClient.send("/chat/message",
         {},
-        JSON.stringify({sender: sender, messageText: 'I`m joined to chat', status: 'JOIN'}))
+        JSON.stringify({sender: thisUser, messageText: 'I`m joined to chat', status: 'JOIN'}))
 }
 
 const onPublicMessageReceived = (payload) => {
@@ -29,7 +30,6 @@ const onPublicMessageReceived = (payload) => {
 
 const onPrivateMessageReceived = (payload) => {
     const payloadData = JSON.parse(payload.body);
-    payloadData.messageText = '[private] ' + payloadData.messageText;
     switch (payloadData.status) {
         case "JOIN":
             showMessage(payloadData);
@@ -46,24 +46,40 @@ function sendMessage() {
     const text_form = document.getElementById('text');
     const text = text_form.value;
     const receiver = document.getElementById('receiver').value;
-    if (receiver === ''){
+    if (receiver === '') {
         stompClient.send("/chat/message", {},
-            JSON.stringify({sender: sender, messageText: text, status: 'MESSAGE'}));
+            JSON.stringify({sender: thisUser, messageText: text, status: 'MESSAGE'}));
     } else {
+        const payloadData = {sender: thisUser, receiver: receiver, messageText: text, status: 'MESSAGE'};
         stompClient.send("/chat/private", {},
-            JSON.stringify({sender: sender, receiver: receiver, messageText: text, status: 'MESSAGE'}));
-        stompClient.send("/chat/private", {},
-            JSON.stringify({sender: sender, receiver: sender, messageText: text, status: 'MESSAGE'}));
+            JSON.stringify(payloadData));
+        showMessage(payloadData);
     }
     text_form.value = '';
 }
 
 function showMessage(payloadData) {
     const text = document.createTextNode(
-        payloadData.sender + ': ' + payloadData.messageText
+        payloadData.sender +
+        (payloadData.receiver ?
+            " [private" +
+                (payloadData.receiver === thisUser ?
+                "" :
+                " to " + payloadData.receiver) +
+            "]: " :
+            ": "
+        ) + payloadData.messageText
     );
     const p = document.createElement('div');
     p.appendChild(text);
     document.getElementById('response')
         .appendChild(p)
+}
+
+async function receiveOldMessages() {
+    await fetch("/messages")
+        .then(value => value.json())
+        .then(msgList => msgList.forEach(
+            msg => showMessage(msg)
+        ))
 }
