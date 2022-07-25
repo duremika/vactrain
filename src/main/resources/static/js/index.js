@@ -56,7 +56,7 @@ function sendMessage() {
         showMessage(payloadData);
     }
     const messages = document.getElementsByClassName('messages').item(0);
-    messages.scrollTop = messages.scrollHeight;
+    setInterval(()=>messages.scrollTo(0, messages.scrollHeight), 50);
     text_form.value = '';
 }
 
