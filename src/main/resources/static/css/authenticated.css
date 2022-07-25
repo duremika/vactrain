@@ -1,22 +1,28 @@
+body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+}
+
 .container {
-    max-width: 1170px;
-    margin: auto;
     width: 60%;
-    float: top;
+    height: 100vh;
+    margin: 0 auto;
+    position: relative;
+}
+
+.inpt {
+    position: absolute;
+    height:20%;
 }
 
 .messages {
-    display: flex;
-    flex-direction: column;
-    max-height: 500px;
+    position: absolute;
+    top: 0;
+    height: 80%;
     overflow-y: scroll;
-    padding: 30px 15px 0 25px;
 }
 
-.msg_history {
-    display: flex;
-    flex-direction: column;
-}
 
 .message {
     display: inline-block;

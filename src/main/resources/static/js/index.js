@@ -12,6 +12,9 @@ async function onConnected(frame) {
     stompClient.send("/chat/message",
         {},
         JSON.stringify({sender: thisUser, messageText: 'I`m joined to chat', status: 'JOIN'}))
+    const messages = document.getElementsByClassName('messages').item(0);
+    setTimeout(() => messages.scrollTo(0, messages.scrollHeight), 50);
+
 }
 
 const onPublicMessageReceived = (payload) => {
@@ -56,18 +59,17 @@ function sendMessage() {
         showMessage(payloadData);
     }
     const messages = document.getElementsByClassName('messages').item(0);
-    setInterval(()=>messages.scrollTo(0, messages.scrollHeight), 50);
+    setTimeout(() => messages.scrollTo(0, messages.scrollHeight), 50);
     text_form.value = '';
 }
 
 
-
 function showMessage(payloadData) {
-    const msg_history = document.getElementsByClassName("msg_history").item(0);
+    const messages = document.getElementsByClassName("messages").item(0);
     if (payloadData.sender === thisUser){
-        msg_history.appendChild(outgoingMsg(payloadData));
+        messages.appendChild(outgoingMsg(payloadData));
     } else {
-        msg_history.appendChild(incomingMsg(payloadData));
+        messages.appendChild(incomingMsg(payloadData));
     }
 
 }
