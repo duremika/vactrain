@@ -9,6 +9,8 @@ import org.springframework.stereotype.Controller;
 import ru.duremika.vactrain.entities.Message;
 import ru.duremika.vactrain.services.MessageService;
 
+import java.sql.Timestamp;
+
 @Controller
 public class ChatController {
     private final SimpMessagingTemplate simpMessagingTemplate;
@@ -25,6 +27,10 @@ public class ChatController {
     @MessageMapping("/message") // */chat/message
     @SendTo("/chatroom/general")
     public Message receivePublicMessage(@Payload Message message) {
+        if (message.getMessageText().trim().isEmpty()){
+            return null;
+        }
+        message.setDate(new Timestamp(System.currentTimeMillis()));
         if (message.getStatus() == Message.Status.MESSAGE) {
             messageService.addMessage(message);
         }
@@ -34,6 +40,10 @@ public class ChatController {
 
     @MessageMapping("/private") // */chat/private
     public Message receivePrivateMessage(@Payload Message message) {
+        if (message.getMessageText().trim().isEmpty()){
+            return null;
+        }
+        message.setDate(new Timestamp(System.currentTimeMillis()));
         String receiver = message.getReceiver();
         simpMessagingTemplate.convertAndSendToUser( // */user/{username}/private
                 receiver,

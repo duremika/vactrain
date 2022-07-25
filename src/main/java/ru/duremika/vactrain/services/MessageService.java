@@ -5,7 +5,6 @@ import ru.duremika.vactrain.entities.Message;
 import ru.duremika.vactrain.repositories.MessageRepository;
 
 import javax.transaction.Transactional;
-import java.sql.Timestamp;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -31,7 +30,6 @@ public class MessageService {
 
     @Transactional
     public void addMessage(Message message) {
-        message.setDate(new Timestamp(System.currentTimeMillis()));
         repository.save(message);
     }
 }

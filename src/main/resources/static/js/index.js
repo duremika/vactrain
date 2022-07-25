@@ -18,7 +18,6 @@ const onPublicMessageReceived = (payload) => {
     const payloadData = JSON.parse(payload.body);
     switch (payloadData.status) {
         case "JOIN":
-            showMessage(payloadData);
             break;
         case "LEAVE":
             break;
@@ -32,7 +31,6 @@ const onPrivateMessageReceived = (payload) => {
     const payloadData = JSON.parse(payload.body);
     switch (payloadData.status) {
         case "JOIN":
-            showMessage(payloadData);
             break;
         case "LEAVE":
             break;
@@ -53,27 +51,25 @@ function sendMessage() {
         const payloadData = {sender: thisUser, receiver: receiver, messageText: text, status: 'MESSAGE'};
         stompClient.send("/chat/private", {},
             JSON.stringify(payloadData));
+
+        payloadData.date = new Date(); // only for client
         showMessage(payloadData);
     }
+    const messages = document.getElementsByClassName('messages').item(0);
+    messages.scrollTop = messages.scrollHeight;
     text_form.value = '';
 }
 
+
+
 function showMessage(payloadData) {
-    const text = document.createTextNode(
-        payloadData.sender +
-        (payloadData.receiver ?
-            " [private" +
-                (payloadData.receiver === thisUser ?
-                "" :
-                " to " + payloadData.receiver) +
-            "]: " :
-            ": "
-        ) + payloadData.messageText
-    );
-    const p = document.createElement('div');
-    p.appendChild(text);
-    document.getElementById('response')
-        .appendChild(p)
+    const msg_history = document.getElementsByClassName("msg_history").item(0);
+    if (payloadData.sender === thisUser){
+        msg_history.appendChild(outgoingMsg(payloadData));
+    } else {
+        msg_history.appendChild(incomingMsg(payloadData));
+    }
+
 }
 
 async function receiveOldMessages() {
