@@ -1,11 +1,20 @@
 function addUser(username) {
     const foundUsername = document.getElementById(username)
-    if (foundUsername){
+    if (foundUsername) {
         const status = foundUsername
             .getElementsByClassName('about').item(0)
-            .getElementsByClassName('status').item(0)
-        status.getElementsByClassName('indicator').item(0).className = 'fa fa-circle online';
-        status.textContent = 'online';
+            .getElementsByClassName('status').item(0);
+
+        status.innerHTML = '';
+
+        const indicator = document.createElement("i");
+        indicator.className = "fa fa-circle online";
+
+        status.appendChild(indicator);
+        status.appendChild(
+            document.createTextNode(" online")
+        );
+
         return;
     }
 
