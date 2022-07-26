@@ -8,6 +8,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import ru.duremika.vactrain.entities.Message;
 import ru.duremika.vactrain.services.MessageService;
+import ru.duremika.vactrain.services.UserOnlineService;
 
 import java.sql.Timestamp;
 
@@ -15,11 +16,18 @@ import java.sql.Timestamp;
 public class ChatController {
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final MessageService messageService;
+    private final UserOnlineService userOnlineService;
     private final Logger logger;
 
-    public ChatController(SimpMessagingTemplate simpMessagingTemplate, MessageService messageService, Logger logger) {
+    public ChatController(
+            SimpMessagingTemplate simpMessagingTemplate,
+            MessageService messageService,
+            UserOnlineService userOnlineService,
+            Logger logger
+    ) {
         this.simpMessagingTemplate = simpMessagingTemplate;
         this.messageService = messageService;
+        this.userOnlineService = userOnlineService;
         this.logger = logger;
     }
 
@@ -31,8 +39,11 @@ public class ChatController {
             return null;
         }
         message.setDate(new Timestamp(System.currentTimeMillis()));
-        if (message.getStatus() == Message.Status.MESSAGE) {
-            messageService.addMessage(message);
+
+        switch (message.getStatus()){
+            case MESSAGE -> messageService.addMessage(message);
+            case JOIN -> userOnlineService.setOnline(message.getSender());
+            case LEAVE -> userOnlineService.setOffline(message.getSender());
         }
         logger.info("Public message: {}", message);
         return message;

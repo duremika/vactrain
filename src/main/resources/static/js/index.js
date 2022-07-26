@@ -8,6 +8,7 @@ async function onConnected(frame) {
     thisUser = frame.headers['user-name'];
     stompClient.subscribe('/chatroom/general', onPublicMessageReceived);
     stompClient.subscribe('/user/' + thisUser + '/private', onPrivateMessageReceived);
+    await getAllOnlineUsers();
     await receiveOldMessages();
     stompClient.send("/chat/message",
         {},
@@ -21,6 +22,7 @@ const onPublicMessageReceived = (payload) => {
     const payloadData = JSON.parse(payload.body);
     switch (payloadData.status) {
         case "JOIN":
+            addUser(payloadData.sender);
             break;
         case "LEAVE":
             break;
@@ -32,14 +34,8 @@ const onPublicMessageReceived = (payload) => {
 
 const onPrivateMessageReceived = (payload) => {
     const payloadData = JSON.parse(payload.body);
-    switch (payloadData.status) {
-        case "JOIN":
-            break;
-        case "LEAVE":
-            break;
-        case "MESSAGE":
-            showMessage(payloadData);
-            break;
+    if (payloadData.status === "MESSAGE") {
+        showMessage(payloadData);
     }
 }
 
@@ -66,7 +62,7 @@ function sendMessage() {
 
 function showMessage(payloadData) {
     const messages = document.getElementsByClassName("messages").item(0);
-    if (payloadData.sender === thisUser){
+    if (payloadData.sender === thisUser) {
         messages.appendChild(outgoingMsg(payloadData));
     } else {
         messages.appendChild(incomingMsg(payloadData));
@@ -79,5 +75,13 @@ async function receiveOldMessages() {
         .then(value => value.json())
         .then(msgList => msgList.forEach(
             msg => showMessage(msg)
+        ))
+}
+
+async function getAllOnlineUsers() {
+    await fetch("/online")
+        .then(value => value.json())
+        .then(users => users.forEach(
+            usr => addUser(usr)
         ))
 }
