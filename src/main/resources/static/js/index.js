@@ -6,6 +6,12 @@ const messages = document.getElementsByClassName('messages').item(0);
 
 stompClient.connect({}, onConnected);
 
+function disconnect(event) {
+    stompClient.send("/chat/message",
+        {},
+        JSON.stringify({sender: thisUser, messageText: 'I`m leave from chat', status: 'LEAVE'}));
+}
+
 function onConnected(frame) {
     thisUser = frame.headers['user-name'];
     stompClient.subscribe('/chatroom/general', onPublicMessageReceived);
@@ -16,9 +22,6 @@ function onConnected(frame) {
     stompClient.send("/chat/message",
         {},
         JSON.stringify({sender: thisUser, messageText: 'I`m joined to chat', status: 'JOIN'}))
-    const messages = document.getElementsByClassName('messages').item(0);
-    setTimeout(() => messages.scrollTo(0, messages.scrollHeight), 50);
-
 }
 
 const onPublicMessageReceived = (payload) => {
@@ -28,6 +31,7 @@ const onPublicMessageReceived = (payload) => {
             updateUserList({username: payloadData.sender, isOnline: true});
             break;
         case "LEAVE":
+            updateUserList({username: payloadData.sender, isOnline: false});
             break;
         case "MESSAGE":
             showMessage(payloadData);
@@ -86,11 +90,13 @@ function selectChat(chatroom) {
 
 async function receiveOldMessages() {
     messages.innerHTML = '';
-    fetch(`/messages?chat=${currentRoom}`)
+    await fetch(`/messages?chat=${currentRoom}`)
         .then(value => value.json())
         .then(msgList => msgList.forEach(
             msg => showMessage(msg)
-        ))
+        ));
+
+    setTimeout(() => messages.scrollTo(0, messages.scrollHeight), 50);
 }
 
 async function getAllUsers() {

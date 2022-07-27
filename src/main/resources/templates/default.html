@@ -44,7 +44,7 @@
                                 Sign up
                             </a>
                             <form method="post" th:action="@{/logout}" sec:authorize="isAuthenticated()">
-                                <button type="submit" class="dropdown-item py-2">
+                                <button type="submit" class="dropdown-item py-2" onclick="disconnect()">
                                     <i class="fa fa-sign-out-alt text-info mr-3"></i>Sign out
                                 </button>
                             </form>
