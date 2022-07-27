@@ -88,3 +88,8 @@ body {
     font-size: 12px;
     margin: 8px 0 0;
 }
+
+.hidden {
+    height: 0;
+    visibility: hidden;
+}

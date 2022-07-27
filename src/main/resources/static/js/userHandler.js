@@ -1,10 +1,18 @@
+const users = document.getElementsByClassName("users").item(0);
+const searchInput = document.getElementById('search_input');
+let allUsers = [];
+searchInput.addEventListener('input', e => {
+    allUsers.forEach(usr => updateUserList(usr));
+});
+
 function updateUserList(user_obj) {
     const username = user_obj.username;
     const isOnline = user_obj.isOnline;
 
-    const foundUsername = document.getElementById(username)
-    if (foundUsername) {
-        const status = foundUsername
+    const foundUser = document.getElementById(username)
+    if (foundUser) {
+        foundUser.className = username.includes(searchInput.value) ? "clearfix" : "clearfix hidden";
+        const status = foundUser
             .getElementsByClassName('about').item(0)
             .getElementsByClassName('status').item(0);
 
@@ -21,14 +29,14 @@ function updateUserList(user_obj) {
         return;
     }
 
-    const users = document.getElementsByClassName("users").item(0);
 
     const user = document.createElement("li");
-    user.className = "clearfix my-2";
+    user.className = username.includes(searchInput.value) ? "clearfix" : "clearfix hidden";
     user.id = username;
     user.onclick = () => {selectChat(username);};
 
     const img = document.createElement("img");
+    img.className = "mt-4"
     img.src = random_img();
     img.alt = "avatar";
 

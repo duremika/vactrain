@@ -105,7 +105,9 @@ async function receiveOldMessages() {
 async function getAllUsers() {
     fetch("/users")
         .then(value => value.json())
-        .then(users => users.forEach(
-            usr => updateUserList(usr)
-        ))
+        .then(users => {
+                allUsers = users;
+                users.forEach(usr => updateUserList(usr));
+            }
+        )
 }
