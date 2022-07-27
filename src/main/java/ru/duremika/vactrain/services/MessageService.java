@@ -19,13 +19,21 @@ public class MessageService {
     }
 
     @Transactional
-    public List<Message> getMessages(String username) {
-        Set<Message> messages = new HashSet<>() {{
-            addAll(repository.getMessagesByReceiver(username));
-            addAll(repository.getMessagesBySender(username));
-            addAll(repository.getMessagesByReceiverIsNull());
-        }};
-        return messages.stream().sorted(Comparator.comparing(Message::getDate)).toList();
+    public List<Message> getMessages(String username, String interlocutor) {
+        if (interlocutor.equals("general")) {
+            return repository.getMessagesByReceiverIsNull()
+                    .stream().sorted(
+                            Comparator.comparing(Message::getDate)
+                    ).toList();
+        } else {
+            Set<Message> messages = new HashSet<>() {{
+                addAll(repository.getMessagesByReceiverAndSender(username, interlocutor));
+                addAll(repository.getMessagesByReceiverAndSender(interlocutor, username));
+            }};
+            return messages.stream().sorted(Comparator.comparing(Message::getDate)).toList();
+        }
+
+
     }
 
     @Transactional

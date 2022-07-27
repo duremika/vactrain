@@ -9,6 +9,7 @@ import ru.duremika.vactrain.entities.User;
 import ru.duremika.vactrain.repositories.UserRepository;
 
 import javax.transaction.Transactional;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -71,5 +72,9 @@ public class UserService {
         } else {
             logger.info("New user not registry. DB returned null");
         }
+    }
+
+    public List<String> findAll() {
+        return repository.findUsersByEnabledTrue().stream().map(User::getUsername).toList();
     }
 }

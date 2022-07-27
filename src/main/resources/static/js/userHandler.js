@@ -1,4 +1,7 @@
-function addUser(username) {
+function updateUserList(user_obj) {
+    const username = user_obj.username;
+    const isOnline = user_obj.isOnline;
+
     const foundUsername = document.getElementById(username)
     if (foundUsername) {
         const status = foundUsername
@@ -8,11 +11,11 @@ function addUser(username) {
         status.innerHTML = '';
 
         const indicator = document.createElement("i");
-        indicator.className = "fa fa-circle online";
+        indicator.className = `fa fa-circle ${isOnline ? 'online' : 'offline'}`;
 
         status.appendChild(indicator);
         status.appendChild(
-            document.createTextNode(" online")
+            document.createTextNode(isOnline ? ' online' : ' offline')
         );
 
         return;
@@ -21,8 +24,9 @@ function addUser(username) {
     const users = document.getElementsByClassName("users").item(0);
 
     const user = document.createElement("li");
-    user.className = "clearfix";
+    user.className = "clearfix my-2";
     user.id = username;
+    user.onclick = () => {selectChat(username);};
 
     const img = document.createElement("img");
     img.src = random_img();
@@ -41,11 +45,11 @@ function addUser(username) {
     status.className = "status";
 
     const indicator = document.createElement("i");
-    indicator.className = "fa fa-circle online";
+    indicator.className = `fa fa-circle ${isOnline ? 'online' : 'offline'}`;
 
     status.appendChild(indicator);
     status.appendChild(
-        document.createTextNode(" online")
+        document.createTextNode(isOnline ? ' online' : ' offline')
     );
 
     about.appendChild(name);

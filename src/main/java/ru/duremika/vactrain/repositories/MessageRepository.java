@@ -6,6 +6,7 @@ import ru.duremika.vactrain.entities.Message;
 import java.util.List;
 
 public interface MessageRepository extends JpaRepository<Message, Long> {
+    List<Message> getMessagesByReceiverAndSender(String receiver, String sender);
     List<Message> getMessagesByReceiver(String receiver);
 
     List<Message> getMessagesBySender(String sender);
