@@ -4,12 +4,12 @@ let thisUser;
 let currentRoom = 'general';
 const messages = document.getElementsByClassName('messages').item(0);
 
-stompClient.connect({}, onConnected);
+stompClient.connect({}, onConnected, disconnect);
 
 function disconnect(event) {
     stompClient.send("/chat/message",
         {},
-        JSON.stringify({sender: thisUser, messageText: 'I`m leave from chat', status: 'LEAVE'}));
+        JSON.stringify({sender: thisUser, status: 'LEAVE'}));
 }
 
 function onConnected(frame) {
@@ -21,7 +21,7 @@ function onConnected(frame) {
     receiveOldMessages();
     stompClient.send("/chat/message",
         {},
-        JSON.stringify({sender: thisUser, messageText: 'I`m joined to chat', status: 'JOIN'}))
+        JSON.stringify({sender: thisUser, status: 'JOIN'}))
 }
 
 const onPublicMessageReceived = (payload) => {
@@ -64,6 +64,9 @@ function sendMessage() {
     }
     setTimeout(() => messages.scrollTo(0, messages.scrollHeight), 50);
     text_form.value = '';
+    stompClient.send("/chat/message",
+        {},
+        JSON.stringify({sender: thisUser, status: 'JOIN'}))
 }
 
 

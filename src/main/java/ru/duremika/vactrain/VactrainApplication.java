@@ -6,7 +6,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.event.EventListener;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 
 @SpringBootApplication
@@ -30,4 +32,8 @@ public class VactrainApplication {
         return new BCryptPasswordEncoder();
     }
 
+    @EventListener
+    public void onDisconnectEvent(SessionDisconnectEvent event) {
+        System.out.println("Client with username "+event.getUser() +"disconnected");
+    }
 }

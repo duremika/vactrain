@@ -35,7 +35,7 @@ public class ChatController {
     @MessageMapping("/message") // */chat/message
     @SendTo("/chatroom/general")
     public Message receivePublicMessage(@Payload Message message) {
-        if (message.getMessageText().trim().isEmpty()){
+        if (message.getMessageText() != null && message.getMessageText().trim().isEmpty()){
             return null;
         }
         message.setDate(new Timestamp(System.currentTimeMillis()));
