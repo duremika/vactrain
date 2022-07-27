@@ -7,6 +7,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
@@ -16,6 +17,7 @@ import ru.duremika.vactrain.services.MessageService;
 import ru.duremika.vactrain.services.UserOnlineService;
 
 import java.sql.Timestamp;
+import java.util.Objects;
 
 @Controller
 public class ChatController {
@@ -40,12 +42,12 @@ public class ChatController {
     @MessageMapping("/message") // */chat/message
     @SendTo("/chatroom/general")
     public Message receivePublicMessage(@Payload Message message) {
-        if (message.getMessageText() != null && message.getMessageText().trim().isEmpty()){
+        if (message.getMessageText() != null && message.getMessageText().trim().isEmpty()) {
             return null;
         }
         message.setDate(new Timestamp(System.currentTimeMillis()));
 
-        switch (message.getStatus()){
+        switch (message.getStatus()) {
             case MESSAGE -> messageService.addMessage(message);
             case JOIN -> userOnlineService.setOnline(message.getSender());
             case LEAVE -> userOnlineService.setOffline(message.getSender());
@@ -56,7 +58,7 @@ public class ChatController {
 
     @MessageMapping("/private") // */chat/private
     public Message receivePrivateMessage(@Payload Message message) {
-        if (message.getMessageText().trim().isEmpty()){
+        if (message.getMessageText().trim().isEmpty()) {
             return null;
         }
         message.setDate(new Timestamp(System.currentTimeMillis()));
@@ -74,10 +76,8 @@ public class ChatController {
 
     @EventListener
     public void onDisconnectEvent(SessionDisconnectEvent event) {
-        try {
-            String username = ((User) ((Authentication) event.getUser()).getPrincipal()).getUsername();
-            userOnlineService.setOffline(username);
-            logger.info("Client with username {} disconnected", username);
-        } catch (HibernateException ignored) {}
+        String username = ((User) ((Authentication) Objects.requireNonNull(event.getUser())).getPrincipal()).getUsername();
+        userOnlineService.setOffline(username);
+        logger.info("Client with username {} disconnected", username);
     }
 }

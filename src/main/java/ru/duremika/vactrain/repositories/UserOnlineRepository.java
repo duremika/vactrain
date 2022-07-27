@@ -7,4 +7,5 @@ import ru.duremika.vactrain.entities.UserOnline;
 
 @Repository
 public interface UserOnlineRepository extends JpaRepository<UserOnline, Long> {
+    void deleteByUsername(String username);
 }

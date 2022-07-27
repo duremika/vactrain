@@ -1,6 +1,7 @@
 package ru.duremika.vactrain.services;
 
 import org.slf4j.Logger;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import ru.duremika.vactrain.entities.UserOnline;
 import ru.duremika.vactrain.repositories.UserOnlineRepository;
@@ -23,16 +24,20 @@ public class UserOnlineService {
 
     @Transactional
     public void setOnline(String username) {
-        repository.save(new UserOnline(username));
+        repository.saveAndFlush(new UserOnline(username));
         logger.info("User {} now online", username);
     }
 
     @Transactional
     public void setOffline(String username) {
-        repository.delete(new UserOnline(username));
-        logger.info("User {} now offline", username);
+        List<String> usersOnline = getAll();
+        if (usersOnline.contains(username)) {
+            repository.deleteByUsername(username);
+            logger.info("User {} now offline", username);
+        }
     }
 
+    @Transactional
     public List<String> getAll() {
         return repository.findAll().stream().map(UserOnline::getUsername).toList();
     }
