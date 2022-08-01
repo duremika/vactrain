@@ -7,7 +7,7 @@ searchInput.addEventListener('input', e => {
 
 function updateUserList(user_obj) {
     const username = user_obj.username;
-    const isOnline = user_obj.isOnline;
+    const isOnline = username === thisUser ? true : user_obj.isOnline;
 
     const foundUser = document.getElementById(username)
     if (foundUser) {

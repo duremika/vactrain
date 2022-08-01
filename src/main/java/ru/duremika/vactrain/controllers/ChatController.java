@@ -1,20 +1,18 @@
 package ru.duremika.vactrain.controllers;
 
-import org.hibernate.HibernateException;
 import org.slf4j.Logger;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import ru.duremika.vactrain.entities.Message;
 import ru.duremika.vactrain.entities.User;
 import ru.duremika.vactrain.services.MessageService;
-import ru.duremika.vactrain.services.UserOnlineService;
+import ru.duremika.vactrain.services.UserService;
 
 import java.sql.Timestamp;
 import java.util.Objects;
@@ -23,18 +21,17 @@ import java.util.Objects;
 public class ChatController {
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final MessageService messageService;
-    private final UserOnlineService userOnlineService;
+    private final UserService userService;
     private final Logger logger;
 
     public ChatController(
             SimpMessagingTemplate simpMessagingTemplate,
             MessageService messageService,
-            UserOnlineService userOnlineService,
-            Logger logger
+            UserService userService, Logger logger
     ) {
         this.simpMessagingTemplate = simpMessagingTemplate;
         this.messageService = messageService;
-        this.userOnlineService = userOnlineService;
+        this.userService = userService;
         this.logger = logger;
     }
 
@@ -49,8 +46,8 @@ public class ChatController {
 
         switch (message.getStatus()) {
             case MESSAGE -> messageService.addMessage(message);
-            case JOIN -> userOnlineService.setOnline(message.getSender());
-            case LEAVE -> userOnlineService.setOffline(message.getSender());
+            case JOIN -> userService.setOnline(message.getSender());
+            case LEAVE -> userService.setOffline(message.getSender());
         }
         logger.info("Public message: {}", message);
         return message;
@@ -77,7 +74,7 @@ public class ChatController {
     @EventListener
     public void onDisconnectEvent(SessionDisconnectEvent event) {
         String username = ((User) ((Authentication) Objects.requireNonNull(event.getUser())).getPrincipal()).getUsername();
-        userOnlineService.setOffline(username);
+        userService.setOffline(username);
         logger.info("Client with username {} disconnected", username);
     }
 }

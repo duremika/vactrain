@@ -6,6 +6,12 @@ import java.sql.Timestamp;
 
 @Entity
 public class PersistentLogins {
+    @Id
+    private String series;
+    private String token;
+    private Timestamp lastUsed;
+    private String username;
+
     public String getUsername() {
         return username;
     }
@@ -37,11 +43,4 @@ public class PersistentLogins {
     public void setLastUsed(Timestamp lastUsed) {
         this.lastUsed = lastUsed;
     }
-
-    private String username;
-    @Id
-    private String series;
-    private String token;
-    private Timestamp lastUsed;
-
 }

@@ -35,7 +35,6 @@ public class UserService {
         this.logger = logger;
     }
 
-    @Transactional
     public Optional<User> findUser(String username) {
         return repository.findUserByUsername(username);
     }
@@ -46,11 +45,10 @@ public class UserService {
         return user.isPresent();
     }
 
-    @Transactional
     public User save(User user) {
+        logger.info("User repository save {}", user);
         User savedUser = repository.save(user);
-        logger.info("User repository saved {}", user);
-        logger.info("User repository after save return result {}", savedUser);
+        logger.info("User repository after saved return result {}", savedUser);
         return savedUser;
     }
 
@@ -74,7 +72,20 @@ public class UserService {
         }
     }
 
-    public List<String> findAll() {
-        return repository.findUsersByEnabledTrue().stream().map(User::getUsername).toList();
+    public List<User> findAll() {
+        return repository.findUsersByEnabledTrue();
+    }
+
+    public void setOnline(String username){
+        findUser(username).ifPresent(user -> {
+           user.setOnline(true);
+           repository.save(user);
+        });
+    }
+    public void setOffline(String username){
+        findUser(username).ifPresent(user -> {
+            user.setOnline(false);
+            repository.save(user);
+        });
     }
 }

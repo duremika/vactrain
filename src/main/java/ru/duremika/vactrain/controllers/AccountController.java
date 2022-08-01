@@ -94,6 +94,7 @@ public class AccountController {
                 } else {
                     user.setEnabled(true);
                     user.setCreatedAt(now);
+                    user.setOnline(false);
                     userService.save(user);
                     logger.info("Get request '/activation' user saved");
                     verificationTokenService.remove(token);

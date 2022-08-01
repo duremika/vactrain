@@ -1,5 +1,6 @@
 package ru.duremika.vactrain.entities;
 
+import org.hibernate.annotations.ColumnDefault;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,6 +26,8 @@ public class User implements UserDetails {
     private String firstname;
     private String lastname;
     private String email;
+    @Column(columnDefinition="boolean default false")
+    private boolean online;
 
     private Timestamp createdAt;
     private boolean enabled;
@@ -40,13 +43,14 @@ public class User implements UserDetails {
     @Override
     public String toString() {
         return String.format(
-                "User{id=%d, username='%s', password='%s', firstname='%s', lastname='%s', email='%s', createdAt='%s', enabled='%s', authorities='%s'}'",
+                "User{id=%d, username='%s', password='%s', firstname='%s', lastname='%s', email='%s', online='%s', createdAt='%s', enabled='%s', authorities='%s'}'",
                 id,
                 username,
                 password,
                 firstname,
                 lastname,
                 email,
+                online,
                 createdAt,
                 enabled,
                 authorities
@@ -129,6 +133,14 @@ public class User implements UserDetails {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public boolean isOnline() {
+        return online;
+    }
+
+    public void setOnline(boolean online) {
+        this.online = online;
     }
 
     public Timestamp getCreatedAt() {
